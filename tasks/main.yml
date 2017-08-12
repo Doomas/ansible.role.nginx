@@ -6,3 +6,16 @@
 # Email:       mail@thomasgalliker.net
 # Description: Nginx configuration tasks
 ##
+
+
+- name: "Ensure all nginx packages are installed"
+  become: true
+  apt: 
+      name: "{{ item }}"
+      state: present
+  with_items:
+      - nginx
+
+
+
+
