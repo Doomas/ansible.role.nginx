@@ -1,0 +1,15 @@
+---
+##
+# File:        defaults/main.yml
+# Created:     12.08.2017
+# Author:      Thomas Galliker
+# Email:       mail@thomasgalliker.net
+# Description: Nginx defaults
+##
+
+nginx_config_path: "/etc/nginx"
+
+certbot_renewal_script_name: "renew-ssl-certificates"
+certbot_renewal_script_dest: "/usr/local/sbin/{{ certbot_renewal_script_name }}"
+
+

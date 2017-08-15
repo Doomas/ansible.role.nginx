@@ -1,0 +1,17 @@
+---
+##
+# File:        handlers/main.yml
+# Created:     18.07.2017
+# Author:      Thomas Galliker
+# Email:       mail@thomasgalliker.net
+# Project:     ansible.role.nginx
+# Url:         https://github.com/Doomas/ansible.role.nginx
+# Description: apache2 handler configuration
+##
+
+
+- name: restart nginx
+  become: yes
+  service:
+    name: nginx
+    state: restarted

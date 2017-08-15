@@ -15,7 +15,74 @@
       state: present
   with_items:
       - nginx
+      - certbot
+      - python-certbot-nginx
 
+- name: "Configure nginx"
+  become: true
+  template:
+      src: nginx.conf.j2
+      dest: "{{ nginx_config_path }}/nginx.conf"
+      owner: root
+      group: root
+      mode: 0644
 
+- name: "Confiure default site"
+  become: true
+  template:
+      src: sites/default.j2
+      dest:  "{{ nginx_config_path }}/sites-available/default"
+      owner: root
+      group: root
+      mode: 0644
+  notify: restart nginx
 
+- name: "Ensure the default site is enabled"
+  become: true
+  file:
+      src: "{{ nginx_config_path }}/sites-available/default"
+      dest:  "{{ nginx_config_path }}/sites-enabled/default"
+      owner: root
+      group: root
+      mode: 0644
+      state: link
+  notify: restart nginx
 
+- name: "Configure sites"
+  become: true
+  template:
+      src: sites/reverse-proxy.j2
+      dest: "{{ nginx_config_path }}/sites-available/{{ item.url }}"
+      owner: root
+      group: root
+      mode: 0644
+  with_items: "{{ nginx.sites }}"
+  notify: restart nginx
+
+- name: "Ensure all sites are enabled"
+  become: true
+  file:
+      src: "{{ nginx_config_path }}/sites-available/{{ item.url }}"
+      dest:  "{{ nginx_config_path }}/sites-enabled/{{ item.url }}"
+      owner: root
+      group: root
+      state: link
+  with_items: "{{ nginx.sites }}"
+  notify: restart nginx
+
+- name: "Ensure certifacte renewal script is present"
+  become: true
+  copy:
+      src: "{{ certbot_renewal_script_name }}"
+      dest: "{{ certbot_renewal_script_dest }}"
+      owner: root
+      group: root
+      mode: 0750
+
+- name: "Ensure cronjob to renew certificates is installed"
+  become: true
+  cron: 
+      name: "renew ssl certificates"
+      minute: "45"
+      hour: "21"
+      job: "{{ certbot_renewal_script_dest }}"
